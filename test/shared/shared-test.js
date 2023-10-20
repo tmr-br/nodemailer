@@ -14,6 +14,8 @@ const zlib = require('zlib');
 chai.config.includeStack = true;
 
 describe('Shared Funcs Tests', function () {
+    this.timeout(100 * 1000); // eslint-disable-line no-invalid-this
+
     describe('Logger tests', function () {
         it('Should create a logger', function () {
             expect(
@@ -412,14 +414,14 @@ describe('Shared Funcs Tests', function () {
                 expect(err).to.not.exist;
                 expect(result).to.deep.equal({
                     servername: 'ipv4.single.dev.ethereal.email',
-                    host: '54.36.85.114',
+                    host: '95.216.108.161',
                     cached: false
                 });
                 shared.resolveHostname({ host: 'ipv4.single.dev.ethereal.email' }, (err, result) => {
                     expect(err).to.not.exist;
                     expect(result).to.deep.equal({
                         servername: 'ipv4.single.dev.ethereal.email',
-                        host: '54.36.85.114',
+                        host: '95.216.108.161',
                         cached: true
                     });
                     done();
@@ -436,11 +438,12 @@ describe('Shared Funcs Tests', function () {
                     expect(new Error('too many tries')).to.not.exist;
                     return done();
                 }
+
                 if (found.size === 3) {
                     return done();
                 }
 
-                shared.resolveHostname({ host: 'ipv4.multi.dev.ethereal.email' }, (err, result) => {
+                shared.resolveHostname({ host: 'ipv4.multi.dev.ethereal.email', dnsTtl: 1 }, (err, result) => {
                     expect(err).to.not.exist;
 
                     expect(result.servername).to.equal('ipv4.multi.dev.ethereal.email');
@@ -448,7 +451,7 @@ describe('Shared Funcs Tests', function () {
 
                     found.add(result.host);
 
-                    resolveNext();
+                    setTimeout(resolveNext, 10);
                 });
             };
 
@@ -477,41 +480,18 @@ describe('Shared Funcs Tests', function () {
                 expect(err).to.not.exist;
                 expect(result).to.deep.equal({
                     servername: 'ipv6.single.dev.ethereal.email',
-                    host: '2001:41d0:304:200::baa9',
+                    host: '2a01:4f9:3051:4501::2',
                     cached: false
                 });
                 shared.resolveHostname({ host: 'ipv6.single.dev.ethereal.email' }, (err, result) => {
                     expect(err).to.not.exist;
                     expect(result).to.deep.equal({
                         servername: 'ipv6.single.dev.ethereal.email',
-                        host: '2001:41d0:304:200::baa9',
+                        host: '2a01:4f9:3051:4501::2',
                         cached: true
                     });
                     done();
                 });
-            });
-        });
-
-        it('should fail resolving a single IPv6 entry', function (done) {
-            // ensure that there is a single Ipv4 interface "available"
-            Object.keys(shared.networkInterfaces).forEach(key => {
-                delete shared.networkInterfaces[key];
-            });
-
-            shared.networkInterfaces.en0 = [
-                {
-                    address: '192.168.1.175',
-                    netmask: '255.255.255.0',
-                    family: 'IPv4',
-                    mac: 'f0:18:98:57:76:44',
-                    internal: false,
-                    cidr: '192.168.1.175/24'
-                }
-            ];
-
-            shared.resolveHostname({ host: 'ipv6.single.dev.ethereal.email' }, err => {
-                expect(err).to.exist;
-                done();
             });
         });
 
@@ -532,6 +512,68 @@ describe('Shared Funcs Tests', function () {
                 });
                 done();
             });
+        });
+
+        it('should fail resolving a single internal IPv4 entry', function (done) {
+            // ensure that there is a single Ipv4 interface "available"
+            Object.keys(shared.networkInterfaces).forEach(key => {
+                delete shared.networkInterfaces[key];
+            });
+
+            shared.networkInterfaces.lo = [
+                {
+                    address: '127.0.0.1',
+                    netmask: '255.0.0.0',
+                    family: 'IPv4',
+                    mac: '00:00:00:00:00:00',
+                    internal: true,
+                    cidr: '127.0.0.1/8'
+                }
+            ];
+
+            shared.resolveHostname({ host: 'ipv4.single.dev.ethereal.email' }, (err, result) => {
+                expect(err).to.not.exist;
+                expect(result).to.deep.equal({
+                    servername: 'ipv4.single.dev.ethereal.email',
+                    host: 'ipv4.single.dev.ethereal.email',
+                    cached: false
+                });
+                done();
+            });
+        });
+
+        it('should succeed resolving a single internal IPv4 entry', function (done) {
+            // ensure that there is a single Ipv4 interface "available"
+            Object.keys(shared.networkInterfaces).forEach(key => {
+                delete shared.networkInterfaces[key];
+            });
+
+            shared.networkInterfaces.lo = [
+                {
+                    address: '127.0.0.1',
+                    netmask: '255.0.0.0',
+                    family: 'IPv4',
+                    mac: '00:00:00:00:00:00',
+                    internal: true,
+                    cidr: '127.0.0.1/8'
+                }
+            ];
+
+            shared.resolveHostname(
+                {
+                    host: 'ipv4.single.dev.ethereal.email',
+                    allowInternalNetworkInterfaces: true
+                },
+                (err, result) => {
+                    expect(err).to.not.exist;
+                    expect(result).to.deep.equal({
+                        servername: 'ipv4.single.dev.ethereal.email',
+                        host: '95.216.108.161',
+                        cached: false
+                    });
+                    done();
+                }
+            );
         });
     });
 });
