@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## [6.10.0](https://github.com/tmr-br/nodemailer/compare/v6.9.6...v6.10.0) (2023-10-20)
+
+
+### Features
+
+* added https://forwardemail.net to well-known services ([c77d70f](https://github.com/tmr-br/nodemailer/commit/c77d70f6ed885695e7778f9604591f48f852e817))
+
+
+### Bug Fixes
+
+* `requeueAttempts=n` should requeue `n` times ([3bfc545](https://github.com/tmr-br/nodemailer/commit/3bfc5452f74e84d8f9aacb2eec7b8a4726b5b40d))
+* 🐛 ses verify, add support for v3 API ([6107585](https://github.com/tmr-br/nodemailer/commit/61075851839207b1ff541b77797ef7afe3c46c42))
+* DSN recipient gets ignored ([75a1504](https://github.com/tmr-br/nodemailer/commit/75a1504e10f20156ef2cecefc27e47e588ab2c80))
+* **inline:** Use 'inline' as the default Content Dispostion value for embedded images ([db32c93](https://github.com/tmr-br/nodemailer/commit/db32c93fefee527bcc239f13056e5d9181a4d8af))
+* **license:** Updated license year ([da4744e](https://github.com/tmr-br/nodemailer/commit/da4744e491f3a68f4f68e4073684370592630e01))
+* **tests:** Removed Node v12 from test matrix as it is not compatible with the test framework anymore ([7fe0a60](https://github.com/tmr-br/nodemailer/commit/7fe0a608ed6bcb70dc6b2de543ebfc3a30abf984))
+
 ## [6.9.6](https://github.com/nodemailer/nodemailer/compare/v6.9.5...v6.9.6) (2023-10-09)
 
 
